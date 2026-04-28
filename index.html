@@ -1,13 +1,2105 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Multi Cronômetro</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Multi Cronômetro Premium</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #202228;
+      --panel: #111315;
+      --panel-2: #171a1f;
+      --text: #ecf0f3;
+      --muted: #9ea6af;
+      --brand: #0a6788;
+      --brand-2: #d9d81d;
+      --green: #4b8f0e;
+      --blue: #1996d2;
+      --red: #cc2a1d;
+      --orange: #ff8a00;
+      --shadow: 0 10px 24px rgba(0,0,0,.28);
+      --radius: 16px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+/* ── Injected theme support (light mode) ───────────────────────── */
+html[data-theme="light"]{
+  --bg-color:#f0f3f9 !important; --bg:#f0f3f9 !important;
+  --card-bg:#ffffff !important; --surface:#ffffff !important;
+  --text-main:#1a1f2e !important; --text:#1a1f2e !important;
+  --text-muted:#4a5568 !important; --muted:#4a5568 !important;
+  --border:#c8d0e0 !important;
+}
+html[data-theme="light"] body{ background:#f0f3f9 !important; color:#1a1f2e !important; }
+html[data-theme="light"] .card,
+html[data-theme="light"] input,
+html[data-theme="light"] select,
+html[data-theme="light"] textarea{
+  background:#ffffff !important; color:#1a1f2e !important; border-color:#c8d0e0 !important;
+}
+html[data-theme="light"] table, html[data-theme="light"] th, html[data-theme="light"] td{
+  color:#1a1f2e !important; border-color:#c8d0e0 !important;
+}
+html[data-theme="light"] .modal-content{ background:#ffffff !important; color:#1a1f2e !important; }
+#op-theme-btn{
+  position:fixed; top:8px; left:8px; z-index:99999;
+  width:38px; height:38px; border-radius:50%;
+  background:rgba(0,0,0,.55); color:#fff; border:1px solid rgba(255,255,255,.25);
+  font-size:18px; cursor:pointer; padding:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:-apple-system,sans-serif;
+}
+html[data-theme="light"] #op-theme-btn{
+  background:#fff; color:#1a1f2e; border-color:#c8d0e0;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+@media print { #op-theme-btn{ display:none !important; } }
+
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, Segoe UI, Roboto, system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      overflow: hidden;
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    /* Layout ajustado para 2 linhas principais (Header Único + Conteúdo) */
+    .app {
+      min-height: 100dvh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      max-width: 820px;
+      margin: 0 auto;
+      background: transparent;
+    }
+
+    /* --- HEADER REDESIGN --- */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      margin: 12px 12px 0;
+      padding: 16px;
+      border-radius: 20px;
+      background-color: #1E1F22;
+      box-shadow: 0 10px 30px rgba(0,0,0,.5);
+      transition: transform 0.32s cubic-bezier(.4,0,.2,1),
+                  opacity    0.32s cubic-bezier(.4,0,.2,1),
+                  margin     0.32s cubic-bezier(.4,0,.2,1),
+                  max-height 0.32s cubic-bezier(.4,0,.2,1),
+                  padding    0.32s cubic-bezier(.4,0,.2,1);
+      max-height: 400px;
+      transform-origin: top center;
+    }
+
+    .app-header.header-hidden {
+      transform: translateY(-130%) scaleY(0.88);
+      opacity: 0;
+      pointer-events: none;
+      margin: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      max-height: 0;
+      overflow: hidden;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .icon-wrapper {
+      background-color: #2B2D31;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .header-text h1 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .header-text p {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: #A0A0A0;
+      line-height: 1.2;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .header-btn {
+      flex: 1;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      text-align: center;
+      transition: opacity 0.2s;
+    }
+    .header-btn:hover { opacity: 0.85; }
+    .btn-novo   { background-color: #5C5E66; }
+    .btn-iniciar{ background-color: #4CAF50; }
+    .btn-zerar  { background-color: #2B2D31; }
+
+    .header-tabs {
+      display: flex;
+      background-color: #2B2D31;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      padding: 4px;
+    }
+
+    .header-tabs .tab {
+      flex: 1;
+      text-align: center;
+      padding: 8px 0;
+      font-size: 14px;
+      font-weight: 500;
+      color: #A0A0A0;
+      cursor: pointer;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .header-tabs .tab.active {
+      background-color: #4B4D54;
+      color: #fff;
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 8px;
+    }
+
+    .stat-card {
+      flex: 1;
+      background-color: #2B2D31;
+      border-radius: 12px;
+      padding: 12px 4px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .stat-card-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .stat-card-label {
+      font-size: 11px;
+      color: #A0A0A0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* --- BOTÕES GLOBAIS --- */
+    .icon-btn, .pill, .action-btn, .ghost-btn, .menu-btn {
+      border: 0;
+      cursor: pointer;
+      transition: transform .16s ease, opacity .16s ease, background .16s ease;
+    }
+    .icon-btn:hover, .pill:hover, .action-btn:hover, .ghost-btn:hover, .menu-btn:hover { transform: translateY(-1px); }
+
+    .icon-btn {
+      width: 40px; height: 40px; border-radius: 999px;
+      background: rgba(255,255,255,.12); color: white;
+      display: grid; place-items: center; font-size: 18px;
+    }
+
+    .pill {
+      background: #2a2f35;
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 800;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+    .pill.primary { background: var(--green); color: white; }
+
+    /* --- CONTEÚDO PRINCIPAL --- */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .content {
+      min-height: 0;
+      padding: 10px 12px calc(12px + var(--safe-bottom));
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .grid-shell {
+      height: 100%;
+      min-height: 0;
+      display: grid;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .grid {
+      height: 100%;
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-content: stretch;
+      min-height: 0;
+    }
+    .grid.count-1 {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+      height: auto;
+    }
+    .grid.count-2 { grid-template-rows: 1fr; }
+    .grid.count-3, .grid.count-4 { grid-template-rows: repeat(2, minmax(0, 1fr)); }
+    .grid.count-many {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-auto-rows: minmax(220px, 1fr);
+      align-content: start;
+      height: auto;
+      padding-bottom: 90px;
+    }
+
+    .card {
+      position: relative;
+      cursor: pointer;
+      background: linear-gradient(180deg, #111315, #171a1f 45%, #13161a 100%);
+      border-radius: 0;
+      border: 1px solid rgba(255,255,255,.045);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      padding: 12px;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      isolation: isolate;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 4px;
+      background: var(--accent, var(--blue));
+    }
+    .card.favorite::after {
+      content: '★';
+      position: absolute;
+      left: 10px;
+      top: 8px;
+      color: rgba(255,255,255,.42);
+      font-size: 19px;
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 8px;
+      position: relative;
+    }
+    .card-title-wrap { min-width: 0; }
+    .card-title {
+      margin: 0;
+      font-size: 1.12rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding-right: 4px;
+      color: #e3e7eb;
+    }
+    .card-sub {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: .86rem;
+      min-height: 1.1em;
+    }
+
+    .card-actions-top {
+      cursor: default;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      position: relative;
+      z-index: 4;
+    }
+    .menu-btn {
+      width: 34px; height: 34px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.06);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+    }
+
+    .time-wrap {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 4px;
+      min-height: 0;
+      flex: 1;
+      padding: 4px 0 6px;
+    }
+
+    .time-ring {
+      position: absolute;
+      inset: 50% auto auto 50%;
+      transform: translate(-50%, -50%);
+      width: min(62vw, 184px);
+      aspect-ratio: 1;
+      pointer-events: none;
+      opacity: .9;
+    }
+    .time-ring-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+      overflow: visible;
+    }
+    .time-ring-track {
+      fill: none;
+      stroke: rgba(255,255,255,.06);
+      stroke-width: 8;
+    }
+    .time-ring-progress {
+      fill: none;
+      stroke: var(--accent, var(--orange));
+      stroke-width: 8;
+      stroke-linecap: round;
+      transition: stroke-dashoffset .12s linear, stroke .2s ease;
+      filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent, var(--orange)) 55%, transparent));
+    }
+
+    .time {
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.035em;
+      line-height: .95;
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 4px;
+      flex-wrap: wrap;
+      font-size: clamp(2rem, 9vw, 3.5rem);
+      margin: 0;
+      color: #e6eaee;
+    }
+    .time .accent { color: var(--orange); }
+    .time .ms {
+      font-size: .42em;
+      color: var(--orange);
+      font-weight: 800;
+    }
+
+    .lap-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+      color: #36d56e;
+      font-size: .96rem;
+      font-weight: 800;
+      max-width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .lap-inline .lap-badge {
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 8px;
+      padding: 0 6px;
+      color: #66b6ff;
+      font-size: .84em;
+      background: rgba(255,255,255,.03);
+    }
+
+    .laps-inline-list {
+      margin-top: 8px;
+      display: grid;
+      gap: 3px;
+      min-height: 54px;
+      max-height: 70px;
+      overflow: hidden;
+    }
+    .lap-row {
+      display: grid;
+      grid-template-columns: 28px 1fr 1fr;
+      gap: 8px;
+      font-size: .83rem;
+      color: #d8dde2;
+      font-variant-numeric: tabular-nums;
+      align-items: center;
+    }
+    .lap-row .idx { color: #33a6ff; font-weight: 800; }
+    .lap-row .cum { color: #9ea6af; }
+    .lap-row .delta { color: #e7eaee; }
+    .lap-empty { color: #808892; font-size: .86rem; }
+
+    .controls {
+      cursor: default;
+      display: grid;
+      grid-template-columns: minmax(62px, .85fr) minmax(76px, 1.15fr);
+      gap: 8px;
+      align-items: stretch;
+      margin-top: auto;
+      min-height: 0;
+    }
+
+    .action-btn, .ghost-btn {
+      min-height: 48px;
+      border-radius: 12px;
+      color: white;
+      font-weight: 900;
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .ghost-btn { background: #66676b; }
+    .action-btn { background: var(--accent, var(--blue)); }
+    .action-btn.pause { background: var(--red); }
+    .ghost-btn.disabled {
+      opacity: .44;
+      pointer-events: none;
+    }
+    .btn-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .btn-label .icon { font-size: 1.18rem; }
+
+    .detail-panel {
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 18px;
+      padding: 12px;
+    }
+    .single-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
+      gap: 14px;
+    }
+
+    @media (max-width: 720px) {
+      .single-layout { grid-template-columns: 1fr; }
+      .grid.count-many { grid-template-columns: 1fr; }
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: 10px 0 12px;
+    }
+    .stat {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 14px;
+      padding: 10px;
+    }
+    .stat .label { color: var(--muted); font-size: .84rem; }
+    .stat .value { margin-top: 4px; font-weight: 900; font-variant-numeric: tabular-nums; }
+
+    .sparkline {
+      width: 100%;
+      height: 118px;
+      display: block;
+    }
+
+    .menu {
+      position: absolute;
+      top: 40px;
+      right: 0;
+      min-width: 210px;
+      background: #2b2d31;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: var(--shadow);
+      padding: 8px;
+      z-index: 10;
+    }
+    .menu.hidden { display: none; }
+    .menu button {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: #edf1f4;
+      text-align: left;
+      padding: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: .97rem;
+    }
+    .menu button:hover { background: rgba(255,255,255,.08); }
+
+    .empty-state {
+      height: 100%;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 20px;
+      border: 1px dashed rgba(255,255,255,.14);
+      border-radius: 22px;
+      color: #c7cdd4;
+      background: rgba(255,255,255,.03);
+    }
+    .empty-state h3 { margin: 8px 0; }
+    .empty-state p { color: var(--muted); max-width: 32ch; }
+
+    .fab {
+      position: fixed;
+      right: 22px;
+      bottom: calc(22px + var(--safe-bottom));
+      width: 66px; height: 66px;
+      border-radius: 999px;
+      border: 0;
+      cursor: pointer;
+      background: #0a6f94;
+      color: white;
+      font-size: 1.9rem;
+      box-shadow: 0 16px 30px rgba(0,0,0,.35), inset 0 -4px 0 rgba(0,0,0,.18);
+      z-index: 22;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      background: rgba(0,0,0,.56);
+      backdrop-filter: blur(6px);
+      z-index: 30;
+      padding: 16px;
+    }
+    .modal.show { display: grid; }
+    .dialog {
+      width: min(760px, calc(100vw - 24px));
+      max-height: min(92dvh, 860px);
+      overflow: auto;
+      background: linear-gradient(180deg, #1b1e23, #121417 100%);
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: var(--shadow);
+    }
+    .dialog-confirm {
+      width: min(460px, calc(100vw - 24px));
+      max-height: none;
+    }
+    .dialog-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 20px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .dialog-head h3 { margin: 0; }
+    .dialog-body { padding: 18px 20px; }
+    .dialog-foot {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 12px 20px 20px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .countdown-setup {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+    @media (max-width: 580px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+    .field { display: flex; flex-direction: column; gap: 8px; }
+    label { color: #c9d0d7; font-size: .95rem; }
+    input[type="text"], input[type="color"], input[type="number"], textarea {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.1);
+      background: #111317;
+      color: var(--text);
+      border-radius: 14px;
+      padding: 12px 14px;
+    }
+    input[type="color"] { height: 48px; padding: 4px; }
+    textarea { min-height: 180px; resize: vertical; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-variant-numeric: tabular-nums;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    th { color: #abb3bb; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(14px + var(--safe-bottom));
+      transform: translateX(-50%);
+      background: #111317;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow);
+      z-index: 40;
+      display: none;
+      max-width: calc(100vw - 24px);
+      text-align: center;
+    }
+    .toast.show { display: block; }
+
+    .hidden { display: none !important; }
+    .small { color: var(--muted); font-size: .9rem; }
+
+    @media (max-width: 400px) {
+      .app-header { padding-inline: 10px; margin-inline: 10px; }
+      .content { padding-inline: 10px; }
+      .card { padding: 10px; }
+      .time { font-size: clamp(1.8rem, 8.2vw, 2.9rem); }
+      .controls { gap: 6px; }
+      .action-btn, .ghost-btn { min-height: 44px; }
+      .header-stats { grid-template-columns: 1fr; }
+      .stat-chip { justify-content: flex-start; }
+    }
+  </style>
 </head>
 <body>
-  <div id="app"></div>
-  <script src="app.js"></script>
+  <div class="app">
+
+    <header class="app-header" id="appHeader">
+      <div class="header">
+        <div class="icon-wrapper" aria-hidden="true">⏱️</div>
+        <div class="header-text">
+          <h1>Multi Cronômetro</h1>
+          <p>Modo foco, histórico e controle simultâneo</p>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button class="header-btn btn-novo" id="addTopBtn" title="Adicionar cronômetro">+ Novo</button>
+        <button class="header-btn btn-iniciar" id="startPauseAllBtn">Iniciar todos</button>
+        <button class="header-btn btn-zerar" id="resetAllBtn">Zerar todos</button>
+      </div>
+
+      <nav class="header-tabs" aria-label="Seções do aplicativo">
+        <button class="tab active" data-page="timersPage">Cronômetros</button>
+        <button class="tab" data-page="historyPage">Histórico</button>
+      </nav>
+
+      <div class="header-stats" aria-label="Resumo dos cronômetros">
+        <div class="stat-card">
+          <span class="stat-card-value" id="summaryCount">0</span>
+          <span class="stat-card-label">Cronômetros</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card-value" id="summaryRunning">0</span>
+          <span class="stat-card-label">Ativos</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card-value" id="summaryLaps">0</span>
+          <span class="stat-card-label">Laps</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="page active" id="timersPage" style="height:100%;">
+        <div class="grid-shell" id="gridShell"></div>
+      </section>
+
+      <section class="page" id="historyPage" style="height:100%; overflow:auto;">
+        <div class="detail-panel">
+          <h3 style="margin:0 0 6px;">Sessões salvas</h3>
+          <p class="small" style="margin:0 0 12px;">O histórico registra sessões quando um cronômetro é resetado ou removido.</p>
+          <div id="historyPageBody"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <button class="fab" id="fab" title="Adicionar cronômetro">⏱</button>
+
+  <div class="modal" id="editModal" aria-hidden="true">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+      <div class="dialog-head">
+        <h3 id="editTitle">Novo cronômetro</h3>
+        <button class="icon-btn" id="closeEditBtn" aria-label="Fechar">✕</button>
+      </div>
+      <div class="dialog-body">
+        
+        <div class="form-grid" style="grid-template-columns: 1fr; margin-bottom: 14px;">
+          <div class="field">
+             <label>Modo</label>
+             <div style="display: flex; gap: 16px; margin-top: 4px; flex-wrap: wrap;">
+               <label style="display:flex; align-items:center; gap:6px; cursor:pointer; color: #e3e7eb;">
+                 <input type="radio" name="formMode" value="stopwatch" checked> Progressivo (Cronômetro)
+               </label>
+               <label style="display:flex; align-items:center; gap:6px; cursor:pointer; color: #e3e7eb;">
+                 <input type="radio" name="formMode" value="countdown"> Regressivo (Timer)
+               </label>
+             </div>
+          </div>
+        </div>
+
+        <div class="countdown-setup" id="countdownSetup" style="display: none;">
+          <div class="field"><label>Horas</label><input type="number" id="formHours" min="0" value="0"></div>
+          <div class="field"><label>Minutos</label><input type="number" id="formMins" min="0" max="59" value="5"></div>
+          <div class="field"><label>Segundos</label><input type="number" id="formSecs" min="0" max="59" value="0"></div>
+        </div>
+
+        <div class="form-grid" style="margin-top: 14px;">
+          <div class="field">
+            <label for="formName">Nome</label>
+            <input id="formName" type="text" placeholder="Ex.: Registro 1" />
+          </div>
+          <div class="field">
+            <label for="formColor">Cor</label>
+            <input id="formColor" type="color" value="#1996d2" />
+          </div>
+        </div>
+
+      </div>
+      <div class="dialog-foot">
+        <button class="ghost-btn" id="cancelEditBtn" style="padding:0 16px; min-height:46px;">Cancelar</button>
+        <button class="action-btn" id="saveEditBtn" style="padding:0 18px; min-height:46px; background:var(--green);">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="historyModal" aria-hidden="true">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
+      <div class="dialog-head">
+        <h3 id="historyTitle">Histórico</h3>
+        <button class="icon-btn" id="closeHistoryBtn" aria-label="Fechar">✕</button>
+      </div>
+      <div class="dialog-body" id="historyBody"></div>
+      <div class="dialog-foot">
+        <button class="ghost-btn" id="closeHistoryBtn2" style="padding:0 18px; min-height:46px;">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="shareModal" aria-hidden="true">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+      <div class="dialog-head">
+        <h3 id="shareTitle">Compartilhar</h3>
+        <button class="icon-btn" id="closeShareBtn" aria-label="Fechar">✕</button>
+      </div>
+      <div class="dialog-body">
+        <div class="field">
+          <label for="shareText">Texto / CSV</label>
+          <textarea id="shareText"></textarea>
+        </div>
+      </div>
+      <div class="dialog-foot">
+        <button class="ghost-btn" id="copyShareBtn" style="padding:0 18px; min-height:46px;">Copiar</button>
+        <button class="action-btn" id="nativeShareBtn" style="padding:0 18px; min-height:46px; background:var(--green);">Compartilhar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="confirmModal" aria-hidden="true">
+    <div class="dialog dialog-confirm" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <div class="dialog-head">
+        <h3 id="confirmTitle">Confirmar ação</h3>
+        <button class="icon-btn" id="closeConfirmBtn" aria-label="Fechar">✕</button>
+      </div>
+      <div class="dialog-body">
+        <p id="confirmMessage" style="margin:0; color:#d9e0e7; line-height:1.55;">Deseja continuar?</p>
+      </div>
+      <div class="dialog-foot">
+        <button class="ghost-btn" id="cancelConfirmBtn" style="padding:0 16px; min-height:46px;">Cancelar</button>
+        <button class="action-btn" id="acceptConfirmBtn" style="padding:0 18px; min-height:46px; background:var(--red);">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = 'multi_cronometro_v28_state';
+    const SESSIONS_KEY = 'multi_cronometro_v28_sessions';
+    const SAVE_DEBOUNCE_MS = 400;
+    const palette = ['#1996d2', '#4b8f0e', '#d6452d', '#7c4dff', '#f6a623', '#16a085'];
+
+    const els = {
+      gridShell: document.getElementById('gridShell'),
+      // NOVOS ELEMENTOS DE RESUMO
+      summaryCount: document.getElementById('summaryCount'),
+      summaryRunning: document.getElementById('summaryRunning'),
+      summaryLaps: document.getElementById('summaryLaps'),
+      
+      historyPageBody: document.getElementById('historyPageBody'),
+      startPauseAllBtn: document.getElementById('startPauseAllBtn'),
+      resetAllBtn: document.getElementById('resetAllBtn'),
+      fab: document.getElementById('fab'),
+      addTopBtn: document.getElementById('addTopBtn'),
+      editModal: document.getElementById('editModal'),
+      editTitle: document.getElementById('editTitle'),
+      formName: document.getElementById('formName'),
+      formColor: document.getElementById('formColor'),
+      formModeRadios: document.getElementsByName('formMode'),
+      countdownSetup: document.getElementById('countdownSetup'),
+      formHours: document.getElementById('formHours'),
+      formMins: document.getElementById('formMins'),
+      formSecs: document.getElementById('formSecs'),
+      closeEditBtn: document.getElementById('closeEditBtn'),
+      cancelEditBtn: document.getElementById('cancelEditBtn'),
+      saveEditBtn: document.getElementById('saveEditBtn'),
+      historyModal: document.getElementById('historyModal'),
+      historyTitle: document.getElementById('historyTitle'),
+      historyBody: document.getElementById('historyBody'),
+      closeHistoryBtn: document.getElementById('closeHistoryBtn'),
+      closeHistoryBtn2: document.getElementById('closeHistoryBtn2'),
+      shareModal: document.getElementById('shareModal'),
+      shareText: document.getElementById('shareText'),
+      closeShareBtn: document.getElementById('closeShareBtn'),
+      copyShareBtn: document.getElementById('copyShareBtn'),
+      nativeShareBtn: document.getElementById('nativeShareBtn'),
+      confirmModal: document.getElementById('confirmModal'),
+      confirmMessage: document.getElementById('confirmMessage'),
+      closeConfirmBtn: document.getElementById('closeConfirmBtn'),
+      cancelConfirmBtn: document.getElementById('cancelConfirmBtn'),
+      acceptConfirmBtn: document.getElementById('acceptConfirmBtn'),
+      toast: document.getElementById('toast')
+    };
+
+    const ui = new Map();
+    const state = {
+      timers: [],
+      sessions: [],
+      editingId: null,
+      menuOpenId: null,
+      currentPage: 'timersPage',
+      historyDirty: true,
+      saveTimer: null,
+      rafId: 0,
+      lastFocusedElement: null,
+      activeModal: null,
+      maximizedId: null,
+      colorDrafts: new Map(),
+      confirmAction: null
+    };
+
+    function uid() {
+      if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+      return 't_' + Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4);
+    }
+    function pad(n, w = 2) { return String(n).padStart(w, '0'); }
+    function esc(s) { return String(s ?? '').replace(/[&<>\"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch])); }
+
+    function showToast(msg) {
+      els.toast.textContent = msg;
+      els.toast.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => els.toast.classList.remove('show'), 2400);
+    }
+
+    function formatHMS(ms, showMs = true) {
+      const abs = Math.max(0, Math.floor(ms));
+      const totalSeconds = Math.floor(abs / 1000);
+      const h = Math.floor(totalSeconds / 3600);
+      const m = Math.floor((totalSeconds % 3600) / 60);
+      const s = totalSeconds % 60;
+      const milli = abs % 1000;
+      const base = h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+      return showMs ? `${base}.${pad(milli, 3)}` : base;
+    }
+
+    function splitTimeHTML(ms) {
+      const abs = Math.max(0, Math.floor(ms));
+      const totalSeconds = Math.floor(abs / 1000);
+      const h = Math.floor(totalSeconds / 3600);
+      const m = Math.floor((totalSeconds % 3600) / 60);
+      const s = totalSeconds % 60;
+      const milli = abs % 1000;
+      const base = h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+      const parts = base.split(':');
+      if (parts.length === 3) return `${parts[0]}:${parts[1]}:<span class="accent">${parts[2]}</span><span class="ms">.${pad(milli,3)}</span>`;
+      return `${parts[0]}:<span class="accent">${parts[1]}</span><span class="ms">.${pad(milli,3)}</span>`;
+    }
+
+    function csvEscape(v) {
+      const s = String(v ?? '');
+      return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }
+
+    function makeTimer(over = {}) {
+      return {
+        id: over.id || uid(),
+        name: over.name || `Registro ${state.timers.length + 1}`,
+        color: over.color || palette[state.timers.length % palette.length],
+        favorite: !!over.favorite,
+        running: !!over.running,
+        baseMs: Number(over.baseMs) || 0,
+        startedAtEpoch: Number(over.startedAtEpoch) || 0,
+        laps: Array.isArray(over.laps) ? over.laps : [],
+        lastLapAt: Number(over.lastLapAt) || 0,
+        mode: over.mode || 'stopwatch',
+        durationMs: Number(over.durationMs) || 0
+      };
+    }
+
+    function serializeTimers() {
+      return state.timers.map(t => ({
+        id: t.id,
+        name: t.name,
+        color: t.color,
+        favorite: t.favorite,
+        running: t.running,
+        baseMs: t.baseMs,
+        startedAtEpoch: t.startedAtEpoch,
+        laps: t.laps,
+        lastLapAt: t.lastLapAt,
+        mode: t.mode,
+        durationMs: t.durationMs
+      }));
+    }
+
+    function getElapsedMs(timer) {
+      return timer.baseMs + (timer.running ? Math.max(0, Date.now() - timer.startedAtEpoch) : 0);
+    }
+
+    function getDisplayMs(timer) {
+      const elapsedMs = getElapsedMs(timer);
+      if (timer.mode === 'countdown') {
+        return Math.max(0, timer.durationMs - elapsedMs);
+      }
+      return elapsedMs;
+    }
+
+    function getTimerMetrics(timer, nowEpoch = null) {
+      const elapsedMs = timer.baseMs + (timer.running ? Math.max(0, (nowEpoch ?? Date.now()) - timer.startedAtEpoch) : 0);
+      const displayMs = timer.mode === 'countdown'
+        ? Math.max(0, timer.durationMs - elapsedMs)
+        : elapsedMs;
+      const currentLapMs = timer.mode === 'countdown' ? 0 : Math.max(0, displayMs - timer.lastLapAt);
+      const nextLapIndex = timer.laps.length + 1;
+      const countdownRatio = timer.mode === 'countdown' && timer.durationMs > 0
+        ? Math.min(1, Math.max(0, elapsedMs / timer.durationMs))
+        : 0;
+      return { elapsedMs, displayMs, currentLapMs, nextLapIndex, countdownRatio };
+    }
+
+    function getCountdownRingOffset(timer, metrics) {
+      const radius = 52;
+      const circumference = 2 * Math.PI * radius;
+      if (timer.mode !== 'countdown' || timer.durationMs <= 0) return circumference;
+      return circumference * (1 - metrics.countdownRatio);
+    }
+
+    function hasProgress(timer) {
+      if (timer.mode === 'countdown') {
+        return getElapsedMs(timer) > 0;
+      }
+      return getElapsedMs(timer) > 0 || timer.laps.length > 0;
+    }
+
+    function getLeftAction(timer) {
+      if (timer.running) return timer.mode === 'countdown' ? 'disabled' : 'lap';
+      return hasProgress(timer) ? 'reset' : 'disabled';
+    }
+
+    function timerStatusText(timer) {
+      if (timer.running) return 'Rodando';
+      if (hasProgress(timer)) return 'Pausado';
+      return 'Pronto';
+    }
+
+    function flushSaveState() {
+      clearTimeout(state.saveTimer);
+      state.saveTimer = null;
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeTimers()));
+        localStorage.setItem(SESSIONS_KEY, JSON.stringify(state.sessions));
+      } catch (error) {
+        console.error('Falha ao salvar estado', error);
+        showToast('Não foi possível salvar no armazenamento local.');
+      }
+    }
+
+    function scheduleSaveState() {
+      clearTimeout(state.saveTimer);
+      state.saveTimer = setTimeout(flushSaveState, SAVE_DEBOUNCE_MS);
+    }
+
+    function loadState() {
+      try {
+        const rawTimers = localStorage.getItem(STORAGE_KEY);
+        const rawSessions = localStorage.getItem(SESSIONS_KEY);
+
+        const storedTimers = rawTimers ? JSON.parse(rawTimers) : null;
+        const storedSessions = rawSessions ? JSON.parse(rawSessions) : null;
+
+        if (Array.isArray(storedTimers)) {
+          const now = Date.now();
+          state.timers = storedTimers.map(stored => {
+            const timer = makeTimer(stored);
+            if (timer.running && timer.startedAtEpoch) {
+              const offlineMs = Math.max(0, now - timer.startedAtEpoch);
+              timer.baseMs += offlineMs;
+              if (timer.mode === 'countdown') {
+                timer.baseMs = Math.min(timer.baseMs, timer.durationMs || timer.baseMs);
+              }
+              timer.running = false;
+              timer.startedAtEpoch = 0;
+            }
+            return timer;
+          });
+        }
+        if (Array.isArray(storedSessions)) state.sessions = storedSessions.slice(0, 300);
+      } catch (error) {
+        console.error('Falha ao carregar estado', error);
+        state.timers = [];
+        state.sessions = [];
+      }
+    }
+
+    function renderSummary() {
+      const count = state.timers.length;
+      const running = state.timers.filter(t => t.running).length;
+      const laps = state.timers.reduce((acc, t) => acc + t.laps.length, 0);
+
+      els.summaryCount.textContent = String(count);
+      els.summaryRunning.textContent = String(running);
+      els.summaryLaps.textContent = String(laps);
+
+      els.startPauseAllBtn.textContent =
+        running === state.timers.length && state.timers.length
+          ? 'Pausar todos'
+          : 'Iniciar todos';
+    }
+
+    function getGridClass(count) {
+      if (count <= 1) return 'count-1';
+      if (count === 2) return 'count-2';
+      if (count === 3) return 'count-3';
+      if (count === 4) return 'count-4';
+      return 'count-many';
+    }
+
+    function timerMenuHTML(timer) {
+      const open = state.menuOpenId === timer.id;
+      return `<div class="menu ${open ? '' : 'hidden'}" id="menu-${timer.id}">
+        <button data-action="edit" data-id="${timer.id}">Renomear / Editar</button>
+        <button data-action="duplicate" data-id="${timer.id}">Duplicar</button>
+        <button data-action="history" data-id="${timer.id}">Histórico</button>
+        <button data-action="shareText" data-id="${timer.id}">Compartilhar texto</button>
+        <button data-action="shareCsv" data-id="${timer.id}">Compartilhar CSV</button>
+        <button data-action="pickColor" data-id="${timer.id}">Definir cor</button>
+        <input type="color" value="${timer.color}" data-color-id="${timer.id}" style="opacity:0;pointer-events:none;width:0;height:0;position:absolute" />
+        <button data-action="remove" data-id="${timer.id}" style="color:#ff8080">Remover cronômetro</button>
+      </div>`;
+    }
+
+    function getLeftButtonMeta(timer) {
+      const action = getLeftAction(timer);
+      if (action === 'lap') {
+        return { className: 'ghost-btn', title: 'Lap', icon: '🏁', label: 'Lap', disabled: false };
+      }
+      if (action === 'reset') {
+        return { className: 'ghost-btn', title: 'Reset', icon: '↻', label: 'Reset', disabled: false };
+      }
+      return { className: 'ghost-btn disabled', title: 'Reset desabilitado', icon: '↻', label: 'Reset', disabled: true };
+    }
+
+    function leftButtonHTML(timer) {
+      const meta = getLeftButtonMeta(timer);
+      return `<button class="${meta.className}" id="left-${timer.id}" data-action="left" data-id="${timer.id}" title="${meta.title}" ${meta.disabled ? 'aria-disabled="true"' : ''}><span class="btn-label"><span class="icon">${meta.icon}</span><span>${meta.label}</span></span></button>`;
+    }
+
+    function getRightButtonMeta(timer) {
+      if (timer.running) {
+        return { className: 'action-btn pause', title: 'Pausar', icon: '❚❚', label: 'Pausar' };
+      }
+      return { className: 'action-btn', title: 'Iniciar', icon: '▶', label: 'Iniciar' };
+    }
+
+    function rightButtonHTML(timer) {
+      const meta = getRightButtonMeta(timer);
+      return `<button class="${meta.className}" id="right-${timer.id}" data-action="toggle" data-id="${timer.id}" title="${meta.title}"><span class="btn-label"><span class="icon">${meta.icon}</span><span>${meta.label}</span></span></button>`;
+    }
+
+    function updateLeftActionButton(button, timer) {
+      if (!button) return;
+      const meta = getLeftButtonMeta(timer);
+      button.className = meta.className;
+      button.title = meta.title;
+      button.setAttribute('data-action', 'left');
+      button.setAttribute('data-id', timer.id);
+      if (meta.disabled) button.setAttribute('aria-disabled', 'true');
+      else button.removeAttribute('aria-disabled');
+      button.innerHTML = `<span class="btn-label"><span class="icon">${meta.icon}</span><span>${meta.label}</span></span>`;
+    }
+
+    function updateRightActionButton(button, timer) {
+      if (!button) return;
+      const meta = getRightButtonMeta(timer);
+      button.className = meta.className;
+      button.title = meta.title;
+      button.setAttribute('data-action', 'toggle');
+      button.setAttribute('data-id', timer.id);
+      button.innerHTML = `<span class="btn-label"><span class="icon">${meta.icon}</span><span>${meta.label}</span></span>`;
+    }
+
+    function getMiniLapsHTML(timer) {
+      if (timer.mode === 'countdown' || !timer.laps.length) return `<div class="lap-empty">Ainda não há tempo de volta</div>`;
+      return timer.laps.slice(0, 3).map(l => `<div class="lap-row"><div class="idx">${l.index}</div><div class="cum">${formatHMS(l.cumulativeMs)}</div><div class="delta">${formatHMS(l.deltaMs)}</div></div>`).join('');
+    }
+
+    function getCurrentLapHTML(timer, metrics = null) {
+      if (timer.mode === 'countdown') {
+        return `<span style="color:var(--muted); font-size: 0.9em; letter-spacing:0.5px;">Modo Regressivo</span>`;
+      }
+
+      if (timer.running) {
+        const m = metrics || getTimerMetrics(timer);
+        return `<span class="lap-badge">${m.nextLapIndex}</span><span>${formatHMS(m.currentLapMs)}</span>`;
+      }
+      const currLap = timer.laps[0];
+      if (!currLap) return `<span class="lap-badge">0</span><span>00:00.000</span>`;
+      return `<span class="lap-badge">${currLap.index}</span><span>${formatHMS(currLap.deltaMs)}</span>`;
+    }
+
+    function getStats(laps) {
+      if (!laps.length) return { min: 0, max: 0, avg: 0 };
+      const deltas = laps.map(l => l.deltaMs);
+      return {
+        min: Math.min(...deltas),
+        max: Math.max(...deltas),
+        avg: deltas.reduce((a, b) => a + b, 0) / deltas.length
+      };
+    }
+
+    function sparklineSVG(values, color) {
+      const w = 800, h = 118;
+      if (!values.length) return `<svg class="sparkline" viewBox="0 0 ${w} ${h}"></svg>`;
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      const range = Math.max(1, max - min);
+      const pts = values.map((v, i) => {
+        const x = values.length === 1 ? 8 : (i / (values.length - 1)) * (w - 16) + 8;
+        const y = h - 8 - ((v - min) / range) * (h - 20);
+        return `${x},${y}`;
+      }).join(' ');
+      return `<svg class="sparkline" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline fill="none" stroke="${color}" stroke-width="4" points="${pts}" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>`;
+    }
+
+    function singleDetailsHTML(timer) {
+      if (timer.mode === 'countdown') {
+        return `
+          <h4 style="margin:0 0 6px;">Detalhes</h4>
+          <div class="small" style="margin-bottom: 12px;">Modo timer ativado.</div>
+          <div class="empty-state" style="padding: 24px 12px;">
+             <div style="font-size:32px; margin-bottom:8px;">⏳</div>
+             <p class="small" style="margin:0;">Detalhes de voltas não se aplicam a cronômetros regressivos.</p>
+          </div>
+        `;
+      }
+
+      const values = [...timer.laps].reverse().map(l => l.deltaMs);
+      const stats = getStats(timer.laps);
+      return `
+        <h4 style="margin:0 0 6px;">Detalhes</h4>
+        <div class="small">No modo com 1 cronômetro, os laps e a tendência ficam visíveis.</div>
+        <div class="stats">
+          <div class="stat"><div class="label">Lap mínimo</div><div class="value">${formatHMS(stats.min)}</div></div>
+          <div class="stat"><div class="label">Lap médio</div><div class="value">${formatHMS(stats.avg || 0)}</div></div>
+          <div class="stat"><div class="label">Lap máximo</div><div class="value">${formatHMS(stats.max)}</div></div>
+        </div>
+        <div class="detail-panel" style="padding:10px; border-radius:16px; background:#101216;">
+          <div class="small" style="margin-bottom:8px;">Tendência dos laps</div>
+          ${sparklineSVG(values.length ? values : [0], timer.color)}
+        </div>
+        <div style="margin-top:12px; max-height:260px; overflow:auto;">
+          <table>
+            <thead><tr><th>Lap</th><th>Acumulado</th><th>Delta</th></tr></thead>
+            <tbody>
+              ${timer.laps.length ? timer.laps.map(l => `<tr><td>${l.index}</td><td>${formatHMS(l.cumulativeMs)}</td><td>${formatHMS(l.deltaMs)}</td></tr>`).join('') : '<tr><td colspan="3" class="small">Ainda não há tempo de volta</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function cardHTML(timer, singleMode = false) {
+      const metrics = getTimerMetrics(timer);
+      const displayMs = metrics.displayMs;
+      const icon = timer.mode === 'countdown' ? '⏳ ' : '⏱️ ';
+      const ringRadius = 52;
+      const ringCircumference = 2 * Math.PI * ringRadius;
+      const ringOffset = getCountdownRingOffset(timer, metrics);
+
+      const core = `
+        <div class="card-head">
+          <div class="card-title-wrap">
+            <h3 class="card-title">${icon}${esc(timer.name)}</h3>
+            <div class="card-sub" id="sub-${timer.id}">${timerStatusText(timer)}</div>
+          </div>
+          <div class="card-actions-top">
+            <button class="menu-btn" data-action="favorite" data-id="${timer.id}" id="fav-${timer.id}" title="Favoritar">${timer.favorite ? '★' : '☆'}</button>
+            <button class="menu-btn" data-action="menu" data-id="${timer.id}" title="Mais opções">⋮</button>
+            ${timerMenuHTML(timer)}
+          </div>
+        </div>
+        <div class="time-wrap">
+          ${timer.mode === 'countdown' ? `<div class="time-ring" aria-hidden="true"><svg class="time-ring-svg" viewBox="0 0 120 120"><circle class="time-ring-track" cx="60" cy="60" r="${ringRadius}"></circle><circle class="time-ring-progress" id="ring-${timer.id}" cx="60" cy="60" r="${ringRadius}" stroke-dasharray="${ringCircumference}" stroke-dashoffset="${ringOffset}"></circle></svg></div>` : ''}
+          <div class="time" id="time-${timer.id}">${splitTimeHTML(displayMs)}</div>
+          <div class="lap-inline" id="lap-${timer.id}" ${timer.mode === 'countdown' ? 'style="border-color:transparent; background:transparent;"' : ''}>${getCurrentLapHTML(timer, metrics)}</div>
+        </div>
+        <div class="laps-inline-list" id="laps-mini-${timer.id}" ${timer.mode === 'countdown' ? 'style="display:none;"' : ''}>${getMiniLapsHTML(timer)}</div>
+        <div class="controls">
+          ${leftButtonHTML(timer)}
+          ${rightButtonHTML(timer)}
+        </div>
+      `;
+
+      if (!singleMode) {
+        return `<article class="card ${timer.favorite ? 'favorite' : ''}" id="card-${timer.id}" data-timer-id="${timer.id}" style="--accent:${timer.color}">${core}</article>`;
+      }
+
+      return `
+        <article class="card single-layout ${timer.favorite ? 'favorite' : ''}" id="card-${timer.id}" data-timer-id="${timer.id}" style="--accent:${timer.color}">
+          <div>${core}</div>
+          <aside class="detail-panel" id="single-detail-${timer.id}">
+            ${singleDetailsHTML(timer)}
+          </aside>
+        </article>
+      `;
+    }
+
+    function captureGridRefs() {
+      ui.clear();
+      state.timers.forEach(timer => {
+        ui.set(timer.id, {
+          card: document.getElementById(`card-${timer.id}`),
+          time: document.getElementById(`time-${timer.id}`),
+          lap: document.getElementById(`lap-${timer.id}`),
+          sub: document.getElementById(`sub-${timer.id}`),
+          left: document.getElementById(`left-${timer.id}`),
+          right: document.getElementById(`right-${timer.id}`),
+          miniLaps: document.getElementById(`laps-mini-${timer.id}`),
+          singleDetail: document.getElementById(`single-detail-${timer.id}`),
+          menu: document.getElementById(`menu-${timer.id}`),
+          favoriteBtn: document.getElementById(`fav-${timer.id}`),
+          ring: document.getElementById(`ring-${timer.id}`)
+        });
+      });
+    }
+
+    function buildGrid() {
+      if (!state.timers.length) {
+        state.maximizedId = null;
+        els.gridShell.innerHTML = `<div class="empty-state"><div><div style="font-size:54px">⏱️</div><h3>Nenhum cronômetro criado</h3><p>Adicione quantos cronômetros precisar. Clique em um card para abrir o Modo Foco.</p><button class="pill primary" data-action="create">Criar agora</button></div></div>`;
+        ui.clear();
+        return;
+      }
+
+      if (state.maximizedId) {
+        const maxTimer = state.timers.find(t => t.id === state.maximizedId);
+        if (maxTimer) {
+          els.gridShell.innerHTML = `
+            <div style="margin-bottom: 12px;">
+              <button class="ghost-btn" data-action="minimize" style="min-height: 36px; padding: 0 16px; border-radius: 8px;">
+                <span class="btn-label"><span class="icon">←</span><span>Voltar ao Grid</span></span>
+              </button>
+            </div>
+            <div class="grid count-1">${cardHTML(maxTimer, true)}</div>
+          `;
+          captureGridRefs();
+          return;
+        }
+        state.maximizedId = null;
+      }
+
+      const gridClass = getGridClass(state.timers.length);
+      const single = state.timers.length === 1;
+      els.gridShell.innerHTML = `<div class="grid ${gridClass}">${state.timers.map(t => cardHTML(t, single)).join('')}</div>`;
+      captureGridRefs();
+    }
+
+    function updateMenuVisibility() {
+      ui.forEach((refs, id) => {
+        if (!refs.menu) return;
+        refs.menu.classList.toggle('hidden', state.menuOpenId !== id);
+      });
+    }
+
+    function updateTimerDynamicUI(timer, options = {}) {
+      const refs = ui.get(timer.id);
+      if (!refs) return;
+
+      const refreshDetails = !!options.refreshDetails;
+      const metrics = options.metrics || getTimerMetrics(timer);
+
+      if (refs.time) refs.time.innerHTML = splitTimeHTML(metrics.displayMs);
+      if (refs.lap) refs.lap.innerHTML = getCurrentLapHTML(timer, metrics);
+      if (refs.sub) refs.sub.textContent = timerStatusText(timer);
+      updateLeftActionButton(refs.left, timer);
+      updateRightActionButton(refs.right, timer);
+      if (refs.favoriteBtn) refs.favoriteBtn.textContent = timer.favorite ? '★' : '☆';
+      if (refs.card) {
+        refs.card.classList.toggle('favorite', timer.favorite);
+        refs.card.style.setProperty('--accent', timer.color);
+      }
+      if (refs.ring) {
+        refs.ring.style.strokeDashoffset = String(getCountdownRingOffset(timer, metrics));
+        refs.ring.style.stroke = timer.color;
+      }
+
+      if (refreshDetails) {
+        if (refs.miniLaps) refs.miniLaps.innerHTML = getMiniLapsHTML(timer);
+        if (refs.singleDetail) refs.singleDetail.innerHTML = singleDetailsHTML(timer);
+      }
+    }
+
+    function updateTimersUI() {
+      let needsSummaryUpdate = false;
+      const now = Date.now();
+
+      state.timers.forEach(timer => {
+        if (!timer.running) return;
+
+        const metrics = getTimerMetrics(timer, now);
+
+        if (timer.mode === 'countdown' && metrics.displayMs <= 0) {
+          timer.running = false;
+          timer.baseMs = timer.durationMs;
+          timer.startedAtEpoch = 0;
+          updateTimerDynamicUI(timer, { refreshDetails: true, metrics: { ...metrics, displayMs: 0, countdownRatio: 1 } });
+          showToast(`⏳ O timer "${timer.name}" terminou!`);
+          needsSummaryUpdate = true;
+          scheduleSaveState();
+          return;
+        }
+
+        const refs = ui.get(timer.id);
+        if (!refs) return;
+        if (refs.time) refs.time.innerHTML = splitTimeHTML(metrics.displayMs);
+        if (refs.lap) refs.lap.innerHTML = getCurrentLapHTML(timer, metrics);
+        if (refs.ring) refs.ring.style.strokeDashoffset = String(getCountdownRingOffset(timer, metrics));
+      });
+
+      if (needsSummaryUpdate) renderSummary();
+    }
+
+    function renderHistoryPage(force = false) {
+      if (!force && state.currentPage !== 'historyPage') return;
+      if (!force && !state.historyDirty) return;
+
+      if (!state.sessions.length) {
+        els.historyPageBody.innerHTML = `<div class="small">Ainda não há sessões salvas. O histórico é gerado quando você usa reset ou remove um cronômetro.</div>`;
+        state.historyDirty = false;
+        return;
+      }
+
+      els.historyPageBody.innerHTML = `
+        <table>
+          <thead><tr><th>Data</th><th>Cronômetro</th><th>Motivo</th><th>Tempo</th><th>Laps</th></tr></thead>
+          <tbody>
+            ${state.sessions.slice(0, 80).map(s => `<tr><td>${new Date(s.createdAt).toLocaleString('pt-BR')}</td><td>${esc(s.timerName)}</td><td>${esc(s.reason)}</td><td>${formatHMS(s.elapsedMs)}</td><td>${s.laps.length}</td></tr>`).join('')}
+          </tbody>
+        </table>
+      `;
+      state.historyDirty = false;
+    }
+
+    function refreshNonStructuralUI({ history = false } = {}) {
+      renderSummary();
+      updateMenuVisibility();
+      if (history) {
+        state.historyDirty = true;
+        renderHistoryPage();
+      }
+      ensureTicker();
+    }
+
+    function rebuildUI({ history = false } = {}) {
+      buildGrid();
+      renderSummary();
+      if (history) state.historyDirty = true;
+      renderHistoryPage();
+      ensureTicker();
+    }
+
+    function saveSessionForTimer(timer, reason = 'reset') {
+      if (!hasProgress(timer)) return;
+      const session = {
+        id: uid(),
+        timerId: timer.id,
+        timerName: timer.name,
+        color: timer.color,
+        reason,
+        createdAt: new Date().toISOString(),
+        elapsedMs: getDisplayMs(timer),
+        laps: timer.laps.map(l => ({ ...l }))
+      };
+      state.sessions.unshift(session);
+      state.sessions = state.sessions.slice(0, 300);
+      state.historyDirty = true;
+    }
+
+    function startTimerInternal(timer, startedAtEpoch = Date.now()) {
+      if (!timer || timer.running) return false;
+      timer.running = true;
+      timer.startedAtEpoch = startedAtEpoch;
+      return true;
+    }
+
+    function pauseTimerInternal(timer) {
+      if (!timer || !timer.running) return false;
+      timer.baseMs = getElapsedMs(timer);
+      timer.running = false;
+      timer.startedAtEpoch = 0;
+      return true;
+    }
+
+    function toggleTimer(id) {
+      const timer = state.timers.find(t => t.id === id);
+      if (!timer) return;
+      if (timer.running) {
+        pauseTimerInternal(timer);
+        updateTimerDynamicUI(timer);
+        renderSummary();
+        flushSaveState();
+      } else {
+        startTimerInternal(timer);
+        updateTimerDynamicUI(timer);
+        renderSummary();
+        scheduleSaveState();
+        ensureTicker();
+      }
+    }
+
+    function resetTimer(id, keepHistory = true) {
+      const timer = state.timers.find(t => t.id === id);
+      if (!timer) return;
+      if (keepHistory) saveSessionForTimer(timer, 'reset');
+      timer.running = false;
+      timer.startedAtEpoch = 0;
+      timer.baseMs = 0;
+      timer.laps = [];
+      timer.lastLapAt = 0;
+      updateTimerDynamicUI(timer, { refreshDetails: true });
+      refreshNonStructuralUI({ history: true });
+      flushSaveState();
+    }
+
+    function addLap(id) {
+      const timer = state.timers.find(t => t.id === id);
+      if (!timer || !timer.running || timer.mode === 'countdown') return;
+      const nowMs = getDisplayMs(timer);
+      const delta = nowMs - (timer.lastLapAt || 0);
+      timer.laps.unshift({
+        index: timer.laps.length + 1,
+        cumulativeMs: nowMs,
+        deltaMs: Math.max(0, delta),
+        createdAt: new Date().toISOString()
+      });
+      timer.lastLapAt = nowMs;
+      updateTimerDynamicUI(timer, { refreshDetails: true });
+      renderSummary();
+      scheduleSaveState();
+    }
+
+    function leftActionHandler(id) {
+      const timer = state.timers.find(t => t.id === id);
+      if (!timer) return;
+      const action = getLeftAction(timer);
+      if (action === 'lap') addLap(id);
+      else if (action === 'reset') resetTimer(id);
+    }
+
+    function duplicateTimer(id) {
+      const timer = state.timers.find(t => t.id === id);
+      if (!timer) return;
+      state.timers.unshift(makeTimer({
+        name: `${timer.name} (cópia)`,
+        color: timer.color,
+        favorite: timer.favorite,
+        mode: timer.mode,
+        durationMs: timer.durationMs
+      }));
+      state.menuOpenId = null;
+      rebuildUI();
+      flushSaveState();
+      showToast('Cronômetro duplicado');
+    }
+
+    function removeTimer(id) {
+      const index = state.timers.findIndex(t => t.id === id);
+      if (index < 0) return;
+      const [timer] = state.timers.splice(index, 1);
+      if (timer) saveSessionForTimer(timer, 'removido');
+      if (state.maximizedId === id) state.maximizedId = null;
+      state.menuOpenId = null;
+      rebuildUI({ history: true });
+      flushSaveState();
+      showToast('Cronômetro removido');
+    }
+
+    function toggleFavorite(id) {
+      const timer = state.timers.find(t => t.id === id);
+      if (!timer) return;
+      timer.favorite = !timer.favorite;
+      updateTimerDynamicUI(timer);
+      scheduleSaveState();
+    }
+
+    function setColorPreview(id, color) {
+      state.colorDrafts.set(id, color);
+      const refs = ui.get(id);
+      if (refs?.card) refs.card.style.setProperty('--accent', color);
+    }
+
+    function commitColor(id, color) {
+      state.colorDrafts.delete(id);
+      const timer = state.timers.find(t => t.id === id);
+      if (!timer) return;
+      timer.color = color;
+      const refs = ui.get(id);
+      if (refs?.singleDetail) refs.singleDetail.innerHTML = singleDetailsHTML(timer);
+      flushSaveState();
+    }
+
+    function exportTimerText(id, csv = false) {
+      const timer = state.timers.find(t => t.id === id);
+      if (!timer) return '';
+      const lines = [];
+      if (csv) {
+        lines.push('nome,lap,acumulado,delta');
+        [...timer.laps].reverse().forEach(l => lines.push(`${csvEscape(timer.name)},${l.index},${formatHMS(l.cumulativeMs)},${formatHMS(l.deltaMs)}`));
+      } else {
+        lines.push(`${timer.name} — Cronômetro`);
+        lines.push(`Tempo atual: ${formatHMS(getDisplayMs(timer))}`);
+        lines.push(`Cor: ${timer.color}`);
+        lines.push('');
+        if (!timer.laps.length) lines.push('Sem laps registrados.');
+        [...timer.laps].reverse().forEach(l => lines.push(`Lap ${l.index}: acumulado ${formatHMS(l.cumulativeMs)} | delta ${formatHMS(l.deltaMs)}`));
+      }
+      return lines.join('\n');
+    }
+
+    function copyTextFallback(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+      } finally {
+        textarea.remove();
+      }
+    }
+
+    async function copyShare() {
+      try {
+        await navigator.clipboard.writeText(els.shareText.value);
+      } catch (error) {
+        copyTextFallback(els.shareText.value);
+      }
+      showToast('Conteúdo copiado');
+    }
+
+    async function nativeShare() {
+      const text = els.shareText.value;
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: 'Multi Cronômetro', text });
+          showToast('Compartilhado');
+          return;
+        } catch (error) {}
+      }
+      await copyShare();
+    }
+
+    function getTimerSessions(id) {
+      return state.sessions.filter(session => session.timerId === id);
+    }
+
+    function openHistoryModal(id) {
+      const timer = state.timers.find(t => t.id === id);
+      if (!timer) return;
+      const timerSessions = getTimerSessions(id);
+      els.historyTitle.textContent = `Histórico — ${timer.name}`;
+      els.historyBody.innerHTML = timerSessions.length ? `
+        <table>
+          <thead><tr><th>Data</th><th>Motivo</th><th>Tempo</th><th>Laps</th></tr></thead>
+          <tbody>
+            ${timerSessions.map(s => `<tr><td>${new Date(s.createdAt).toLocaleString('pt-BR')}</td><td>${esc(s.reason)}</td><td>${formatHMS(s.elapsedMs)}</td><td>${s.laps.length}</td></tr>`).join('')}
+          </tbody>
+        </table>
+      ` : `<div class="small">Sem histórico salvo para este cronômetro.</div>`;
+      openModal(els.historyModal);
+    }
+
+    function openShareModal(text) {
+      els.shareText.value = text;
+      openModal(els.shareModal);
+    }
+
+    function closeMenus() {
+      if (!state.menuOpenId) return;
+      state.menuOpenId = null;
+      updateMenuVisibility();
+    }
+
+    function toggleMenu(id) {
+      state.menuOpenId = state.menuOpenId === id ? null : id;
+      updateMenuVisibility();
+    }
+
+    function openConfirm(message, onAccept) {
+      els.confirmMessage.textContent = message;
+      state.confirmAction = typeof onAccept === 'function' ? onAccept : null;
+      openModal(els.confirmModal, els.acceptConfirmBtn);
+    }
+
+    function closeConfirm() {
+      state.confirmAction = null;
+      closeModal(els.confirmModal);
+    }
+
+    function acceptConfirm() {
+      const action = state.confirmAction;
+      closeConfirm();
+      if (typeof action === 'function') action();
+    }
+
+    function syncAll() {
+      if (!state.timers.length) return showToast('Crie ao menos um cronômetro para sincronizar.');
+      const now = Date.now();
+      state.timers.forEach(timer => {
+        timer.running = false;
+        timer.startedAtEpoch = 0;
+        timer.baseMs = 0;
+        timer.laps = [];
+        timer.lastLapAt = 0;
+        startTimerInternal(timer, now);
+        updateTimerDynamicUI(timer, { refreshDetails: true, metrics: getTimerMetrics(timer, now) });
+      });
+      refreshNonStructuralUI({ history: false });
+      scheduleSaveState();
+      showToast('Cronômetros sincronizados e iniciados juntos.');
+    }
+
+    function startPauseAll() {
+      if (!state.timers.length) return;
+      const allRunning = state.timers.every(t => t.running);
+      const now = Date.now();
+      state.timers.forEach(timer => {
+        if (allRunning) pauseTimerInternal(timer);
+        else if (!timer.running) startTimerInternal(timer, now);
+        updateTimerDynamicUI(timer, { metrics: getTimerMetrics(timer, allRunning ? null : now) });
+      });
+      renderSummary();
+      if (allRunning) flushSaveState();
+      else scheduleSaveState();
+      ensureTicker();
+    }
+
+    function performResetAll() {
+      state.timers.forEach(timer => {
+        if (hasProgress(timer)) {
+          saveSessionForTimer(timer, 'reset múltiplo');
+          timer.running = false;
+          timer.startedAtEpoch = 0;
+          timer.baseMs = 0;
+          timer.laps = [];
+          timer.lastLapAt = 0;
+          updateTimerDynamicUI(timer, { refreshDetails: true });
+        }
+      });
+      refreshNonStructuralUI({ history: true });
+      flushSaveState();
+    }
+
+    function resetAll() {
+      const hasActive = state.timers.some(hasProgress);
+      if (!hasActive) return showToast('Nenhum cronômetro para resetar.');
+      openConfirm('Deseja zerar todos os cronômetros e salvar as sessões no histórico?', performResetAll);
+    }
+
+    function tick() {
+      state.rafId = 0;
+      updateTimersUI();
+      if (state.timers.some(t => t.running)) {
+        state.rafId = requestAnimationFrame(tick);
+      }
+    }
+
+    function ensureTicker() {
+      if (state.rafId || !state.timers.some(t => t.running)) return;
+      state.rafId = requestAnimationFrame(tick);
+    }
+
+    function openEditModal(id = null) {
+      state.editingId = id;
+      const timer = state.timers.find(t => t.id === id);
+      
+      els.editTitle.textContent = timer ? 'Editar cronômetro' : 'Novo cronômetro';
+      els.formName.value = timer?.name || `Registro ${state.timers.length + 1}`;
+      els.formColor.value = timer?.color || palette[state.timers.length % palette.length];
+      
+      const mode = timer?.mode || 'stopwatch';
+      document.querySelector(`input[name="formMode"][value="${mode}"]`).checked = true;
+      els.countdownSetup.style.display = mode === 'countdown' ? 'grid' : 'none';
+
+      if (mode === 'countdown' && timer) {
+         const totalSecs = Math.floor(timer.durationMs / 1000);
+         els.formHours.value = Math.floor(totalSecs / 3600);
+         els.formMins.value = Math.floor((totalSecs % 3600) / 60);
+         els.formSecs.value = totalSecs % 60;
+      } else {
+         els.formHours.value = 0;
+         els.formMins.value = 5;
+         els.formSecs.value = 0;
+      }
+
+      openModal(els.editModal, els.formName);
+    }
+
+    function saveEdit() {
+      const name = els.formName.value.trim() || `Registro ${state.timers.length + 1}`;
+      const color = els.formColor.value;
+      const modeElement = document.querySelector('input[name="formMode"]:checked');
+      const mode = modeElement ? modeElement.value : 'stopwatch';
+      
+      let durationMs = 0;
+      if (mode === 'countdown') {
+        const h = parseInt(els.formHours.value) || 0;
+        const m = parseInt(els.formMins.value) || 0;
+        const s = parseInt(els.formSecs.value) || 0;
+        durationMs = ((h * 3600) + (m * 60) + s) * 1000;
+      }
+
+      if (state.editingId) {
+        const timer = state.timers.find(t => t.id === state.editingId);
+        if (timer) {
+          const modeChanged = timer.mode !== mode;
+          const durationChanged = timer.durationMs !== durationMs;
+
+          timer.name = name;
+          timer.color = color;
+          timer.mode = mode;
+          timer.durationMs = durationMs;
+
+          if (modeChanged || (mode === 'countdown' && durationChanged)) {
+             timer.running = false;
+             timer.baseMs = 0;
+             timer.startedAtEpoch = 0;
+             timer.laps = [];
+             timer.lastLapAt = 0;
+          }
+          
+          updateTimerDynamicUI(timer, { refreshDetails: true });
+        }
+        state.editingId = null;
+        closeModal(els.editModal);
+        flushSaveState();
+      } else {
+        state.timers.push(makeTimer({ name, color, mode, durationMs }));
+        state.editingId = null;
+        closeModal(els.editModal);
+        rebuildUI();
+        flushSaveState();
+      }
+    }
+
+    function openModal(modal, focusTarget = null) {
+      state.lastFocusedElement = document.activeElement;
+      state.activeModal = modal;
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden', 'false');
+      const target = focusTarget || modal.querySelector('button, input, textarea, [tabindex]:not([tabindex="-1"])');
+      if (target) setTimeout(() => target.focus(), 20);
+    }
+
+    function closeModal(modal) {
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden', 'true');
+      if (state.activeModal === modal) state.activeModal = null;
+      if (state.lastFocusedElement && typeof state.lastFocusedElement.focus === 'function') {
+        setTimeout(() => state.lastFocusedElement.focus(), 20);
+      }
+    }
+
+    function trapFocus(event) {
+      const modal = state.activeModal;
+      if (!modal || event.key !== 'Tab') return;
+      const focusables = [...modal.querySelectorAll('button, input, textarea, [href], [tabindex]:not([tabindex="-1"])')].filter(el => !el.disabled && el.offsetParent !== null);
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    function switchPage(pageId) {
+      state.currentPage = pageId;
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab.dataset.page === pageId));
+      document.querySelectorAll('.page').forEach(page => page.classList.toggle('active', page.id === pageId));
+      if (pageId === 'historyPage') renderHistoryPage(true);
+    }
+
+    function onGridClick(event) {
+      const forbiddenClickZones = event.target.closest('[data-action], .menu, input[type="color"], .controls, .card-actions-top');
+      
+      if (!forbiddenClickZones) {
+        const card = event.target.closest('.card');
+        if (card) {
+          const id = card.dataset.timerId;
+          state.maximizedId = state.maximizedId === id ? null : id;
+          rebuildUI();
+        }
+        return;
+      }
+
+      const actionTarget = event.target.closest('[data-action]');
+      if (!actionTarget) return;
+
+      const action = actionTarget.dataset.action;
+      const id = actionTarget.dataset.id;
+
+      if (action !== 'menu' && action !== 'pickColor') closeMenus();
+
+      switch (action) {
+        case 'create': return openEditModal();
+        case 'minimize':
+          state.maximizedId = null;
+          return rebuildUI();
+        case 'toggle': return toggleTimer(id);
+        case 'left': return leftActionHandler(id);
+        case 'menu': return toggleMenu(id);
+        case 'favorite': return toggleFavorite(id);
+        case 'edit': return openEditModal(id);
+        case 'duplicate': return duplicateTimer(id);
+        case 'history': return openHistoryModal(id);
+        case 'shareText': return openShareModal(exportTimerText(id, false));
+        case 'shareCsv': return openShareModal(exportTimerText(id, true));
+        case 'pickColor': {
+          const input = els.gridShell.querySelector(`[data-color-id="${id}"]`);
+          if (input) {
+            const timer = state.timers.find(t => t.id === id);
+            if (timer) input.value = timer.color;
+            input.click();
+          }
+          return;
+        }
+        case 'remove': return removeTimer(id);
+      }
+    }
+
+    function onGridColorInput(event) {
+      const input = event.target.closest('[data-color-id]');
+      if (!input) return;
+      setColorPreview(input.dataset.colorId, input.value);
+    }
+
+    function onGridColorChange(event) {
+      const input = event.target.closest('[data-color-id]');
+      if (!input) return;
+      commitColor(input.dataset.colorId, input.value);
+    }
+
+    function bindStaticEvents() {
+      els.gridShell.addEventListener('click', onGridClick);
+      els.gridShell.addEventListener('input', onGridColorInput);
+      els.gridShell.addEventListener('change', onGridColorChange);
+
+      els.fab.addEventListener('click', () => openEditModal());
+      els.addTopBtn.addEventListener('click', () => openEditModal());
+      els.startPauseAllBtn.addEventListener('click', startPauseAll);
+      els.resetAllBtn.addEventListener('click', resetAll);
+      els.closeEditBtn.addEventListener('click', () => closeModal(els.editModal));
+      els.cancelEditBtn.addEventListener('click', () => closeModal(els.editModal));
+      els.saveEditBtn.addEventListener('click', saveEdit);
+      els.closeHistoryBtn.addEventListener('click', () => closeModal(els.historyModal));
+      els.closeHistoryBtn2.addEventListener('click', () => closeModal(els.historyModal));
+      els.closeShareBtn.addEventListener('click', () => closeModal(els.shareModal));
+      els.copyShareBtn.addEventListener('click', copyShare);
+      els.nativeShareBtn.addEventListener('click', nativeShare);
+      els.closeConfirmBtn.addEventListener('click', closeConfirm);
+      els.cancelConfirmBtn.addEventListener('click', closeConfirm);
+      els.acceptConfirmBtn.addEventListener('click', acceptConfirm);
+
+      els.formModeRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          els.countdownSetup.style.display = e.target.value === 'countdown' ? 'grid' : 'none';
+        });
+      });
+
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => switchPage(tab.dataset.page));
+      });
+
+      document.addEventListener('click', event => {
+        if (event.target.classList.contains('modal')) closeModal(event.target);
+        const insideMenu = event.target.closest('.menu');
+        const menuBtn = event.target.closest('[data-action="menu"]');
+        if (!insideMenu && !menuBtn && state.menuOpenId) closeMenus();
+      });
+
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && state.activeModal) {
+          closeModal(state.activeModal);
+          return;
+        }
+        trapFocus(event);
+      });
+
+      window.addEventListener('beforeunload', flushSaveState);
+    }
+
+    function init() {
+      loadState();
+      bindStaticEvents();
+      rebuildUI({ history: true });
+    }
+
+    init();
+
+    // --- HEADER HIDE / SHOW ---
+    (function() {
+      const header    = document.getElementById('appHeader');
+      let hidden = false;
+
+      function setHidden(val) {
+        hidden = val;
+        header.classList.toggle('header-hidden', hidden);
+      }
+
+
+      // Detecta scroll em QUALQUER elemento scrollável da página
+      let lastScrollY = 0;
+      let ticking = false;
+
+      function handleScroll(currentY) {
+        const delta = currentY - lastScrollY;
+        if (Math.abs(delta) < 6) return;
+        if (delta > 0 && !hidden) setHidden(true);
+        if (delta < 0 &&  hidden) setHidden(false);
+        lastScrollY = currentY;
+      }
+
+      // Listener genérico que captura scroll de qualquer filho
+      document.addEventListener('scroll', (e) => {
+        const el = e.target;
+        const y = el.scrollTop !== undefined ? el.scrollTop : window.scrollY;
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            handleScroll(y);
+            ticking = false;
+          });
+          ticking = true;
+        }
+      }, { passive: true, capture: true });
+
+      // Touch swipe direto como fallback (mobile)
+      let touchStartY = 0;
+      document.addEventListener('touchstart', e => {
+        touchStartY = e.touches[0].clientY;
+      }, { passive: true });
+      document.addEventListener('touchend', e => {
+        const delta = touchStartY - e.changedTouches[0].clientY;
+        if (Math.abs(delta) < 30) return;
+        if (delta > 0 && !hidden) setHidden(true);
+        if (delta < 0 &&  hidden) setHidden(false);
+      }, { passive: true });
+    })();
+  </script>
+
+<script>
+(function(){
+  try{
+    var k='operix_theme_v1';
+    var saved=localStorage.getItem(k);
+    if(saved==='light') document.documentElement.setAttribute('data-theme','light');
+    function render(){
+      var btn=document.getElementById('op-theme-btn');
+      if(!btn) return;
+      btn.textContent=document.documentElement.getAttribute('data-theme')==='light'?'🌙':'☀️';
+    }
+    window.__opToggleTheme=function(){
+      var cur=document.documentElement.getAttribute('data-theme')==='light';
+      if(cur){ document.documentElement.removeAttribute('data-theme'); localStorage.setItem(k,'dark'); }
+      else{ document.documentElement.setAttribute('data-theme','light'); localStorage.setItem(k,'light'); }
+      render();
+    };
+    document.addEventListener('DOMContentLoaded',function(){
+      if(!document.getElementById('op-theme-btn')){
+        var b=document.createElement('button');
+        b.id='op-theme-btn'; b.type='button';
+        b.setAttribute('aria-label','Alternar tema');
+        b.onclick=window.__opToggleTheme;
+        document.body.appendChild(b);
+      }
+      render();
+    });
+  }catch(e){}
+})();
+</script>
 </body>
 </html>
