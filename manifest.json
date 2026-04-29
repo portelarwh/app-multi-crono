@@ -4,15 +4,27 @@
   "description": "Multi cronômetro com histórico, laps e modo foco — funciona offline",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#202228",
+  "background_color": "#111315",
   "theme_color": "#0a6788",
   "orientation": "portrait-primary",
   "icons": [
     {
+      "src": "assets/Icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/Icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
       "src": "assets/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
