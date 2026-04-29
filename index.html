@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Multi Cronômetro Premium</title>
+  <title>Multi Cronômetro</title>
+  <meta name="theme-color" content="#0a6788">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Multi Cronômetro">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
@@ -715,6 +721,13 @@ html[data-theme="light"] #op-theme-btn{
       .header-stats { grid-template-columns: 1fr; }
       .stat-chip { justify-content: flex-start; }
     }
+
+    @keyframes timer-done-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      30% { opacity: 0.55; transform: scale(0.96); }
+    }
+    .timer-done .time { animation: timer-done-pulse 0.7s ease 3; }
+    .timer-done .time-ring-progress { stroke: var(--red) !important; filter: drop-shadow(0 0 10px rgba(204,42,29,0.7)) !important; }
   </style>
 </head>
 <body>
@@ -941,6 +954,23 @@ html[data-theme="light"] #op-theme-btn{
     }
     function pad(n, w = 2) { return String(n).padStart(w, '0'); }
     function esc(s) { return String(s ?? '').replace(/[&<>\"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch])); }
+    function safeColor(c) { return /^#[0-9a-fA-F]{3,6}$/.test(String(c)) ? c : '#1996d2'; }
+
+    function playBeep() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.9);
+      } catch (_) {}
+    }
 
     function showToast(msg) {
       els.toast.textContent = msg;
@@ -1090,13 +1120,17 @@ html[data-theme="light"] #op-theme-btn{
           state.timers = storedTimers.map(stored => {
             const timer = makeTimer(stored);
             if (timer.running && timer.startedAtEpoch) {
-              const offlineMs = Math.max(0, now - timer.startedAtEpoch);
-              timer.baseMs += offlineMs;
               if (timer.mode === 'countdown') {
-                timer.baseMs = Math.min(timer.baseMs, timer.durationMs || timer.baseMs);
+                const offlineElapsed = timer.baseMs + Math.max(0, now - timer.startedAtEpoch);
+                if (offlineElapsed >= (timer.durationMs || 0)) {
+                  // Timer terminou enquanto o app estava fechado
+                  timer.baseMs = timer.durationMs || offlineElapsed;
+                  timer.running = false;
+                  timer.startedAtEpoch = 0;
+                }
+                // else: mantém running=true, startedAtEpoch válido — retoma automaticamente
               }
-              timer.running = false;
-              timer.startedAtEpoch = 0;
+              // stopwatch: startedAtEpoch ainda válido, getElapsedMs() calcula o total correto
             }
             return timer;
           });
@@ -1236,7 +1270,7 @@ html[data-theme="light"] #op-theme-btn{
         const y = h - 8 - ((v - min) / range) * (h - 20);
         return `${x},${y}`;
       }).join(' ');
-      return `<svg class="sparkline" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline fill="none" stroke="${color}" stroke-width="4" points="${pts}" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>`;
+      return `<svg class="sparkline" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline fill="none" stroke="${safeColor(color)}" stroke-width="4" points="${pts}" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>`;
     }
 
     function singleDetailsHTML(timer) {
@@ -1309,11 +1343,11 @@ html[data-theme="light"] #op-theme-btn{
       `;
 
       if (!singleMode) {
-        return `<article class="card ${timer.favorite ? 'favorite' : ''}" id="card-${timer.id}" data-timer-id="${timer.id}" style="--accent:${timer.color}">${core}</article>`;
+        return `<article class="card ${timer.favorite ? 'favorite' : ''}" id="card-${timer.id}" data-timer-id="${timer.id}" style="--accent:${safeColor(timer.color)}">${core}</article>`;
       }
 
       return `
-        <article class="card single-layout ${timer.favorite ? 'favorite' : ''}" id="card-${timer.id}" data-timer-id="${timer.id}" style="--accent:${timer.color}">
+        <article class="card single-layout ${timer.favorite ? 'favorite' : ''}" id="card-${timer.id}" data-timer-id="${timer.id}" style="--accent:${safeColor(timer.color)}">
           <div>${core}</div>
           <aside class="detail-panel" id="single-detail-${timer.id}">
             ${singleDetailsHTML(timer)}
@@ -1394,7 +1428,7 @@ html[data-theme="light"] #op-theme-btn{
       if (refs.favoriteBtn) refs.favoriteBtn.textContent = timer.favorite ? '★' : '☆';
       if (refs.card) {
         refs.card.classList.toggle('favorite', timer.favorite);
-        refs.card.style.setProperty('--accent', timer.color);
+        refs.card.style.setProperty('--accent', safeColor(timer.color));
       }
       if (refs.ring) {
         refs.ring.style.strokeDashoffset = String(getCountdownRingOffset(timer, metrics));
@@ -1421,7 +1455,13 @@ html[data-theme="light"] #op-theme-btn{
           timer.baseMs = timer.durationMs;
           timer.startedAtEpoch = 0;
           updateTimerDynamicUI(timer, { refreshDetails: true, metrics: { ...metrics, displayMs: 0, countdownRatio: 1 } });
-          showToast(`⏳ O timer "${timer.name}" terminou!`);
+          showToast(`⏳ Timer "${timer.name}" terminou!`);
+          playBeep();
+          const doneRefs = ui.get(timer.id);
+          if (doneRefs?.card) {
+            doneRefs.card.classList.add('timer-done');
+            setTimeout(() => doneRefs.card?.classList.remove('timer-done'), 2200);
+          }
           needsSummaryUpdate = true;
           scheduleSaveState();
           return;
@@ -1451,7 +1491,7 @@ html[data-theme="light"] #op-theme-btn{
         <table>
           <thead><tr><th>Data</th><th>Cronômetro</th><th>Motivo</th><th>Tempo</th><th>Laps</th></tr></thead>
           <tbody>
-            ${state.sessions.slice(0, 80).map(s => `<tr><td>${new Date(s.createdAt).toLocaleString('pt-BR')}</td><td>${esc(s.timerName)}</td><td>${esc(s.reason)}</td><td>${formatHMS(s.elapsedMs)}</td><td>${s.laps.length}</td></tr>`).join('')}
+            ${state.sessions.slice(0, 80).map(s => `<tr><td>${new Date(s.createdAt).toLocaleString()}</td><td>${esc(s.timerName)}</td><td>${esc(s.reason)}</td><td>${formatHMS(s.elapsedMs)}</td><td>${s.laps.length}</td></tr>`).join('')}
           </tbody>
         </table>
       `;
@@ -1683,7 +1723,7 @@ html[data-theme="light"] #op-theme-btn{
         <table>
           <thead><tr><th>Data</th><th>Motivo</th><th>Tempo</th><th>Laps</th></tr></thead>
           <tbody>
-            ${timerSessions.map(s => `<tr><td>${new Date(s.createdAt).toLocaleString('pt-BR')}</td><td>${esc(s.reason)}</td><td>${formatHMS(s.elapsedMs)}</td><td>${s.laps.length}</td></tr>`).join('')}
+            ${timerSessions.map(s => `<tr><td>${new Date(s.createdAt).toLocaleString()}</td><td>${esc(s.reason)}</td><td>${formatHMS(s.elapsedMs)}</td><td>${s.laps.length}</td></tr>`).join('')}
           </tbody>
         </table>
       ` : `<div class="small">Sem histórico salvo para este cronômetro.</div>`;
@@ -1828,6 +1868,12 @@ html[data-theme="light"] #op-theme-btn{
         const m = parseInt(els.formMins.value) || 0;
         const s = parseInt(els.formSecs.value) || 0;
         durationMs = ((h * 3600) + (m * 60) + s) * 1000;
+      }
+
+      if (mode === 'countdown' && durationMs <= 0) {
+        showToast('Defina uma duração maior que zero para o modo regressivo.');
+        els.formMins.focus();
+        return;
       }
 
       if (state.editingId) {
@@ -2002,6 +2048,14 @@ html[data-theme="light"] #op-theme-btn{
         if (!insideMenu && !menuBtn && state.menuOpenId) closeMenus();
       });
 
+      // Fecha menu ao tocar fora em touchscreen (iOS não dispara click em elementos não interativos)
+      document.addEventListener('touchstart', event => {
+        if (!state.menuOpenId) return;
+        const insideMenu = event.target.closest('.menu');
+        const menuBtn = event.target.closest('[data-action="menu"]');
+        if (!insideMenu && !menuBtn) closeMenus();
+      }, { passive: true });
+
       document.addEventListener('keydown', event => {
         if (event.key === 'Escape' && state.activeModal) {
           closeModal(state.activeModal);
@@ -2013,10 +2067,19 @@ html[data-theme="light"] #op-theme-btn{
       window.addEventListener('beforeunload', flushSaveState);
     }
 
+    function registerSW() {
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js').catch(() => {});
+        });
+      }
+    }
+
     function init() {
       loadState();
       bindStaticEvents();
       rebuildUI({ history: true });
+      registerSW();
     }
 
     init();
