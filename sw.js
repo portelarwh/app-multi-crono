@@ -2,7 +2,6 @@ const CACHE = 'multi-crono-v1';
 const ASSETS = [
   './index.html',
   './styles.css',
-  './app.js',
   './manifest.json',
   './assets/icon.svg'
 ];
